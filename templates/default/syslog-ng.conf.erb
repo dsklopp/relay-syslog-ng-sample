@@ -1,0 +1,29 @@
+@version: 3.5
+@include "scl.conf"
+@include "`scl-root`/system/tty10.conf"
+
+
+# First, set some global options.
+options { chain_hostnames(off); flush_lines(0); use_dns(no); use_fqdn(no);
+      owner("root"); group("root"); perm(0640); stats_freq(0);
+      bad_hostname("^gconfd$");
+};
+
+#### RELAY
+template LogglyFormat {
+    template("<${PRI}>1 ${ISODATE} ${HOST} ${PROGRAM} ${PID} ${MSGID} [KEY_HERE@41058] $MSG\n");
+    template_escape(no);
+};
+
+template logentriesTemplate {
+     template("KEY_HERE $ISODATE $HOST $MSG\n"); template_escape(no); 
+};
+
+source s_relay { tcp(port(514)); };
+destination d_relay_loggly { tcp("logs-01.loggly.com" port(514) template(LogglyFormat)); };
+destination d_relay_logentries {tcp ("data.logentries.com" port(10000) template(logentriesTemplate)); };
+destination d_relay_file {file("/var/log/all_network_hosts.log"); };
+
+log{ source(s_relay); destination(d_relay_file); };
+log{ source(s_relay); destination(d_relay_loggly); };
+log{ source(s_relay); destination(d_relay_logentries); };
