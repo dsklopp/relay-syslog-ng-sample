@@ -1,4 +1,4 @@
-name             'relay-syslog-ng'
+name             'relay-syslog-ng-sample'
 maintainer       'Daniel Klopp'
 maintainer_email 'dklopp@infoblox.com'
 license          'All rights reserved'
